@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div id="save-message"></div>
+        <h1>Paramètres</h1>
+        <form id="settings-form" action="save_settings.php" method="POST">
+            <label for="country-color">Couleur du pays sélectionné :</label>
+            <input type="color" id="country-color" name="country-color" required>
+            <button type="submit">Enregistrer les paramètres</button>
+        </form>
+        <button onclick="window.location.href='map.html'">Retour à la carte</button>
+    </div>
+
+    <script>
+        fetch('settings.txt')
+            .then(response => response.text())
+            .then(data => {
+                const settings = JSON.parse(data);
+                document.getElementById('country-color').value = settings.countryColor || '#0000ff';
+            });
+
+        document.getElementById('settings-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const countryColor = document.getElementById('country-color').value;
+            const settings = { countryColor };
+            fetch('save_settings.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settings)
+            }).then(response => {
+                const saveMessage = document.getElementById('save-message');
+                if (response.ok) {
+                    saveMessage.style.color = 'green';
+                    saveMessage.textContent = 'Paramètres enregistrés avec succès';
+                } else {
+                    saveMessage.style.color = 'red';
+                    saveMessage.textContent = 'Erreur lors de l\'enregistrement des paramètres';
+                }
+                saveMessage.style.display = 'block';
+                saveMessage.style.textAlign = 'center';
+                setTimeout(() => {
+                    saveMessage.style.display = 'none';
+                }, 3000);
+            }).catch(() => {
+                const saveMessage = document.getElementById('save-message');
+                saveMessage.style.color = 'red';
+                saveMessage.textContent = 'Erreur lors de l\'enregistrement des paramètres';
+                saveMessage.style.display = 'block';
+                saveMessage.style.textAlign = 'center';
+                setTimeout(() => {
+                    saveMessage.style.display = 'none';
+                }, 3000);
+            });
+        });
+    </script>
+
+</body>
+
+</html>
